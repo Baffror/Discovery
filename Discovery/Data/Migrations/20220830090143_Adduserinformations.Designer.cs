@@ -3,6 +3,7 @@ using System;
 using Discovery.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Discovery.Data.Migrations
 {
     [DbContext(typeof(AspNetIdentityDbContext))]
-    partial class AspNetIdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220830090143_Adduserinformations")]
+    partial class Adduserinformations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.8");

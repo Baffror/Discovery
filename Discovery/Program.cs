@@ -1,4 +1,6 @@
 using Discovery.Data;
+using Discovery.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -8,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 // Accès aux données directement dans les service de l'app
 builder.Services.AddDbContext<AspNetIdentityDbContext>(opts => opts.UseSqlite(builder.Configuration["DbConnectionString"]));
+builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AspNetIdentityDbContext>();
 
 var app = builder.Build();
 
