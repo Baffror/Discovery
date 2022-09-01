@@ -56,11 +56,31 @@ namespace Discovery.Controllers
             return View(model);  
         }
 
+        [HttpGet]
+        public IActionResult Login()
+        {
+            var login = new LoginViewModel();
+            return View("Login", login);
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login()
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
+            if (ModelState.IsValid)
+            {
+                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RemenberMe,false);
+                if (result.Succeeded)
+                {
 
+                } else
+                {
+                    ModelState.AddModelError("Email", "Email ou Mot de passe incorrect");
+                }
+            }
+            model.Password = String.Empty;
+            return View(model);
         }
 
 
