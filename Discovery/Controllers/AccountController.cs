@@ -48,7 +48,7 @@ namespace Discovery.Controllers
                 }
                 } else
                 {
-                    ModelState.AddModelError("incorrect_confirmation","Les mots de passes ne conrrespondent pas");
+                    ModelState.AddModelError("Password","Les mots de passes ne conrrespondent pas");
                 }
             }
             model.Password = String.Empty;
