@@ -1,5 +1,28 @@
-﻿<ul class="navbar-nav">
-    <li class="nav-item">
-        <a asp-action="Register" asp-controller="Account" class="nav-link">S'enregistrer</a>
-    </li>
+﻿@using Discovery.Data.Models
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<User> signInManager
+@inject UserManager<User> userManager
+
+<ul class="navbar-nav">
+    @if (signInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a class="nav-link">Bonjour, @userManager.GetUserName(User)</a>
+        </li>
+        <li class="nav-item">
+            <form method="post" class="form-inline" asp-action="Logout" asp-controller="Account">
+                <button type="submit" class="btn nav-link">Déconnexion</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a asp-action="Register" asp-controller="Account" class="nav-link">S'enregistrer</a>
+        </li>
+        <li class="nav-item">
+            <a asp-action="Login" asp-controller="Account" class="nav-link">S'authentifier</a>
+        </li>
+    }
 </ul>
