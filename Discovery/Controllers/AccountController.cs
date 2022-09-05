@@ -1,5 +1,6 @@
 ﻿using Discovery.Data.Models;
 using Discovery.Models;
+using Discovery.Services.Abstractions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,13 +9,14 @@ namespace Discovery.Controllers
     public class AccountController : Controller
     {
         private readonly SignInManager<User> signInManager;
-
+        private readonly IEmailSender emailSender;
         private readonly UserManager<User> UserManager;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender)
         {
             this.UserManager = userManager;
             this.signInManager = signInManager;
+            this.emailSender = emailSender;
         }
 
         [HttpGet]

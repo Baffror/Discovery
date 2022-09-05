@@ -1,5 +1,8 @@
 using Discovery.Data;
 using Discovery.Data.Models;
+using Discovery.Opts;
+using Discovery.Services;
+using Discovery.Services.Abstractions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +15,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AspNetIdentityDbContext>(opts => opts.UseSqlite(builder.Configuration["DbConnectionString"]));
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AspNetIdentityDbContext>();
 
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddOptions();
+builder.Services.Configure<MailOption>(builder.Configuration.GetSection("Email");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,6 +30,8 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+
 
 app.MapControllerRoute(
     name: "default",
