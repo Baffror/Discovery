@@ -3,6 +3,7 @@ using Discovery.Models;
 using Discovery.Services.Abstractions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace Discovery.Controllers
 {
@@ -25,7 +26,7 @@ namespace Discovery.Controllers
             var vm = new RegisterViewModel();
             return View(vm);
         }
-    
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -33,29 +34,52 @@ namespace Discovery.Controllers
             if (ModelState.IsValid)
             {
 
-                if (model.Password == model.ConfirmPassword) { 
+                if (model.Password == model.ConfirmPassword)
+                {
+                    var user = new User
+                    {
+                        Email = model.Email,
+                        Name = model.Name,
+                        Lastname = model.Lastname,
+                        UserName = model.Email
+                    };
+                    await emailSender.SendMail(model.Email, "Confirmez votre email", "Copier coller le lien :" + confirmUrl);
 
-                var user = new User
-                {
-                    Email = model.Email,
-                    Name = model.Name,
-                    Lastname = model.Lastname,
-                    UserName = model.Email
-                };
-                var result = await UserManager.CreateAsync(user,model.Password);
-                if (result.Succeeded)
-                {
-                    await signInManager.SignInAsync(user, isPersistent: false); 
-                    return RedirectToAction("Index", "Home");
+                    var result = await UserManager.CreateAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+                        var routeValue = new { email = model.Email, code = HttpUtility.UrlEncode(code) };
+                        var confirmUrl = Url.Action("ConfirmEmail", "Account", routeValue, Request.Scheme);
+
+                        return RedirectToAction("Index", "Home", new { message = "Un email de confirmation vous a été envoyé " });
+                    }
                 }
-                } else
+                else
                 {
-                    ModelState.AddModelError("Password","Les mots de passes ne conrrespondent pas");
+                    ModelState.AddModelError("Password", "Les mots de passes ne conrrespondent pas");
                 }
             }
             model.Password = String.Empty;
             model.ConfirmPassword = String.Empty;
-            return View(model);  
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string email, string code)
+        {
+            var user = await UserManager.FindByEmailAsync(email);
+            if (user?.EmailConfirmed == false)
+            {
+                code = HttpUtility.UrlDecode(code);
+                var confirmationresult = await UserManager.ConfirmEmailAsync(user, code);
+                if (confirmationresult.Succeeded)
+                {
+                    await signInManager.SignInAsync(user, isPersistent: false);
+                }
+            }
+            return RedirectToAction("index", "home");
+
         }
 
         [HttpGet]
@@ -70,23 +94,43 @@ namespace Discovery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RemenberMe,false);
-                if (result.Succeeded)
-                {
 
-                } else
+            var user = await UserManager.FindByEmailAsync(model.Email);
+            if (user is not null)
+            {
+                if (user.EmailConfirmed)
                 {
-                    ModelState.AddModelError("Email", "Email ou Mot de passe incorrect");
+                    if (ModelState.IsValid)
+                    {
+                        var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RemenberMe, false);
+                        if (result.Succeeded)
+                        {
+
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("Email", "Email ou Mot de passe incorrect");
+                        }
+                    }
+
                 }
+                else
+                {
+                    ModelState.AddModelError("Email", "Confirmation d'email nécessaire");
+                }
+
+            }
+            else
+            {
+                ModelState.AddModelError("Email", "Email ou Mot de passe incorrect");
             }
             model.Password = String.Empty;
             return View(model);
         }
 
 
-        public async Task<IActionResult> Logout() {
+        public async Task<IActionResult> Logout()
+        {
 
             await signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");

@@ -13,11 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 // Accès aux données directement dans les service de l'app
 builder.Services.AddDbContext<AspNetIdentityDbContext>(opts => opts.UseSqlite(builder.Configuration["DbConnectionString"]));
-builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AspNetIdentityDbContext>();
+builder.Services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<AspNetIdentityDbContext>()
+                .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddOptions();
-builder.Services.Configure<MailOption>(builder.Configuration.GetSection("Email");
+builder.Services.Configure<MailOption>(builder.Configuration.GetSection("Email"));
 
 var app = builder.Build();
 

@@ -13,9 +13,9 @@ namespace Discovery.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string message="")
         {
-            return View();
+            return View(model :message);
         }
 
         public IActionResult Privacy()
