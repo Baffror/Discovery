@@ -83,6 +83,56 @@ namespace Discovery.Controllers
         }
 
         [HttpGet]
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgetPassword(ForgetPassswordViewModel model)
+        {
+
+            if (ModelState.IsValid)
+            {
+                var user = await UserManager.FindByEmailAsync(model.Email);
+                if (user is null)
+                {
+                    var code = await UserManager.GeneratePasswordResetTokenAsync(user);
+                    var routeValues = new { email = model.Email, ocde = HttpUtility.UrlEncode(code) };
+                    var resetUrl = Url.Action("ResetPassword", "Account", routeValues, Request.Scheme);
+
+                    await emailSender.SendMail(model.Email, "réinitialisation de mot de passe", "Veuillez utiliser le lien suivant pour réinitialiser votre mot de passe : " + resetUrl);
+                }
+                return View("ForgetPasswordConfirmation");
+            }
+            return View(model);
+
+        }
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string code)
+        {
+            var viewmodel = new ResetPasswordViewModel(email = email, code = code);
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(string email,string code)
+        {
+            var user = await UserManager.FindByEmailAsync(email);
+            if (user?.EmailConfirmed == false)
+            {
+                code = HttpUtility.UrlDecode(code);
+                var confirmationresult = await UserManager.ConfirmEmailAsync(user, code);
+                if (confirmationresult.Succeeded)
+                {
+                    await signInManager.SignInAsync(user, isPersistent: false);
+                }
+            }
+            return RedirectToAction("index", "home");
+        }
+
+        [HttpGet]
         public IActionResult Login()
         {
             var login = new LoginViewModel();
