@@ -43,7 +43,7 @@ namespace Discovery.Controllers
                         Lastname = model.Lastname,
                         UserName = model.Email
                     };
-                    await emailSender.SendMail(model.Email, "Confirmez votre email", "Copier coller le lien :" + confirmUrl);
+
 
                     var result = await UserManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
@@ -51,7 +51,7 @@ namespace Discovery.Controllers
                         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
                         var routeValue = new { email = model.Email, code = HttpUtility.UrlEncode(code) };
                         var confirmUrl = Url.Action("ConfirmEmail", "Account", routeValue, Request.Scheme);
-
+                        await emailSender.SendMail(model.Email, "Confirmez votre email", "Copier coller le lien :" + confirmUrl);
                         return RedirectToAction("Index", "Home", new { message = "Un email de confirmation vous a été envoyé " });
                     }
                 }
